@@ -1,5 +1,5 @@
 const express = require("express");
-const { createUser, singleUserGet, getUsers, deleteUser, updateUser, statusUpdate, changePassword } = require("../controllers/userControllers");
+const { createUser, singleUserGet, getUsers, deleteUser, updateUser, statusUpdate, changePassword } = require("../controllers/userController");
 const { userValidation, userUpdateValidation, statusValidation, passwordValidation } = require("../utils/validation");
 const { errorHandler } = require("../middlewares/errorMiddleware");
 const upload = require("../utils/multer");

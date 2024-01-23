@@ -1,6 +1,6 @@
 const express = require("express");
 const { loginValidation, verifyValidation, emailValidation, resetPasswordValidation } = require("../utils/validation");
-const { userLogin, userVerify, resendOTP, forgotPassword, resetPassword, logoutUser } = require("../controllers/authControllers");
+const { userLogin, userVerify, resendOTP, forgotPassword, resetPassword, logoutUser } = require("../controllers/authController");
 const { errorHandler } = require("../middlewares/errorMiddleware");
 const Auth = require("../middlewares/authentication");
 
