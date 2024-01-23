@@ -1,7 +1,7 @@
 const { check } = require("express-validator");
 const userModel = require("../models/userModel");
 
-
+//  users
 exports.userValidation = [
     check("fullName", "FullName is a required field.").notEmpty(),
     check("email", "Email must be a valid email.").isEmail().custom(async (email, { req }) => {
@@ -20,14 +20,45 @@ exports.userValidation = [
         minSymbols: 1
     }),
     check("confirmPassword", "Confirm password is required").notEmpty().custom(async (confirmPassword, { req }) => {
-        const password = req.body.password
-        // If password and confirm password not same
-        // don't allow to sign up and throw error
+        const password = req.body.password;
         if (password !== confirmPassword) {
-            throw new Error('New Password and Confirm Password does not match.')
+            throw new Error('Password and Confirm password does not match.');
         }
     })
     // check('role_id', "Role id is Required.").isMongoId(),
+]
+
+// authtication
+exports.loginValidation = [
+    check("email","Email is a required field.").isEmail(),
+    check("password","Password is a required field.").notEmpty()
+]
+// verfiy
+exports.verifyValidation = [
+    check("email","Email is a required field.").isEmail(),
+    check("otp","OTP is a required field.").notEmpty()
+]
+// verfiy
+exports.emailValidation = [
+    check("email","Email is a required field.").isEmail(),
+]
+
+// reset password validation
+exports.resetPasswordValidation = [
+    check("email", "Email is a required field.").isEmail(),
+    check("password", "Password is Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.").isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+    }),
+    check("confirmPassword", "Confirm password is required").notEmpty().custom(async (confirmPassword, { req }) => {
+        const password = req.body.password;
+        if (password !== confirmPassword) {
+            throw new Error('Password and Confirm password does not match.');
+        }
+    })
 ]
 
 exports.passwordValidation = [
