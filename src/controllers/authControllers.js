@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const userLogin = async (req, res) => {
     try {
         // email check exist or not
-        const userData = await userModel.findOne({ email: req.body.email, status: "Active" });
+        const userData = await userModel.findOne({ email: req.body.email, status: "Active", deleteAt: {$exists: false} });
 
         if (!userData) {
             return res.status(404).json({ message: "Invalid email or password.", success: false })
@@ -69,7 +69,7 @@ const userVerify = async (req, res) => {
 const resendOTP = async (req, res) => {
     try {
         // get data for email
-        const data = await userModel.findOne({ email: req.body.email });
+        const data = await userModel.findOne({ email: req.body.email, deleteAt: {$exists: false} });
 
         if (!data) {
             return res.status(404).json({ message: "Account not found with the provided email.", success: false });
@@ -93,7 +93,7 @@ const resendOTP = async (req, res) => {
 const forgotPassword = async (req, res) => {
     try {
         // email check exist or not
-        const userData = await userModel.findOne({ email: req.body.email })
+        const userData = await userModel.findOne({ email: req.body.email, deleteAt: {$exists: false} })
 
         if (userData) {
             // generate token
@@ -153,10 +153,24 @@ const resetPassword = async (req, res) => {
     }
 }
 
+// logout function
+const logoutUser = async (req, res) => {
+    try {
+         const { _id } = req.user;
+
+         const userData = await userModel.findByIdAndUpdate({_id},{$unset : {token : 1}});
+
+         return res.status(200).json({message: "Logout successfully.",success: true})
+    } catch (error) {
+        return res.status(500).json({ message: error.message || 'Internal server Error', success: false })
+    }
+}
+
 module.exports = {
     userLogin,
     userVerify,
     resendOTP,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    logoutUser
 }

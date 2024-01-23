@@ -46,6 +46,15 @@ exports.userUpdateValidation = [
     // check('role_id', "Role id is Required.").isMongoId(),
 ]
 
+// status validation
+exports.statusValidation = [
+    check("status", "Status is a required field.").notEmpty().custom(async (status, { req }) => {
+        if (status && status !== "Active" && status !== "Inactive") {
+            throw new Error("Invalid status.Please enter the status value for Active or Inactive.")
+        }
+    }),
+]
+
 // authtication
 exports.loginValidation = [
     check("email","Email is a required field.").isEmail(),
@@ -80,26 +89,26 @@ exports.resetPasswordValidation = [
 ]
 
 exports.passwordValidation = [
-    check("current_password", "Current Password is Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.").isStrongPassword({
+    check("currentPassword", "Current Password is Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.").isStrongPassword({
         minLength: 8,
         minLowercase: 1,
         minUppercase: 1,
         minNumbers: 1,
         minSymbols: 1
     }),
-    check("new_password", "New Password is Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.").isStrongPassword({
+    check("newPassword", "New Password is Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.").isStrongPassword({
         minLength: 8,
         minLowercase: 1,
         minUppercase: 1,
         minNumbers: 1,
         minSymbols: 1
     }),
-    check("confirm_password", "Confirm password is required").notEmpty().custom(async (confirmPassword, { req }) => {
-        const password = req.body.new_password
+    check("confirmPassword", "Confirm password is required").notEmpty().custom(async (confirmPassword, { req }) => {
+        const password = req.body.newPassword
         // If password and confirm password not same
         // don't allow to sign up and throw error
         if (password !== confirmPassword) {
-            throw new Error('New Password and Confirm Password does not match.')
+            throw new Error('New password and Confirm password does not match.')
         }
     })
 ]

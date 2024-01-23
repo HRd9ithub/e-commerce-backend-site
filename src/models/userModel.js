@@ -48,9 +48,9 @@ const userModel = new Schema({
         enum: ['Active', 'Inactive'],
         default : "Active"
     },
-    roleId: {
-        type: Schema.Types.ObjectId,
-        ref: "user_role"
+    isAdmin: {
+        type: Boolean,
+        default: false
     },
     otp: {
         type: String
