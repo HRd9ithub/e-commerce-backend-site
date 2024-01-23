@@ -1,5 +1,6 @@
 const { check } = require("express-validator");
 const userModel = require("../models/userModel");
+const categoryModel = require("../models/categoryModel");
 
 //  users
 exports.userValidation = [
@@ -25,7 +26,6 @@ exports.userValidation = [
             throw new Error('Password and Confirm password does not match.');
         }
     })
-    // check('role_id', "Role id is Required.").isMongoId(),
 ]
 
 //  user update
@@ -111,4 +111,22 @@ exports.passwordValidation = [
             throw new Error('New password and Confirm password does not match.')
         }
     })
+]
+
+
+// ------------------------------- category api 
+
+exports.categoryValidation = [
+    check("name","Name is a required field.").notEmpty().custom(async (name, { req }) => {
+        const data = await categoryModel.findOne({ name: { $regex: new RegExp(name, 'i') }})
+        
+        if (name && data && data._id !== req.params.id) {
+            throw new Error("Category already exists.")
+        }
+    })
+]
+// ------------------------------- sub category api 
+exports.subCategoryValidation = [
+    check("name","Name is a required field.").notEmpty(),
+    check("categoryId","CategoryId is a required field.").isMongoId()
 ]
