@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userModel = new Schema({
     fullName: {
@@ -30,9 +31,7 @@ const userModel = new Schema({
         default: "India",
     },
     state: {
-        type: String,
-        enum: ['Active', 'Inactive'],
-        default : "Active"
+        type: String
     },
     city: {
         type: String,
@@ -46,7 +45,8 @@ const userModel = new Schema({
     },
     status: {
         type: String,
-        enum: ['Active', 'Inactive']
+        enum: ['Active', 'Inactive'],
+        default : "Active"
     },
     roleId: {
         type: Schema.Types.ObjectId,
@@ -60,6 +60,12 @@ const userModel = new Schema({
     },
     expireIn: {
         type: Number
+    },
+    forgotTokenExpireIn: {
+        type: Number
+    },
+    forgotToken : {
+        type: String
     },
     token: {
         type: String
@@ -77,5 +83,22 @@ userModel.pre("save",async function(next) {
     }
     next()
 })
+
+// password compare
+userModel.methods.comparePassword = async function (password) {
+    const isMatched = await bcrypt.compare(password, this.password);
+    return isMatched;
+}
+
+// generate token
+userModel.methods.generateToken = async function () {
+    try {
+        const token = jwt.sign({ _id: this._id },process.env.SECRET_KEY);
+        return token
+    } catch (error) {
+        console.log('error :>>>> ', error);
+    }
+}
+
 
 module.exports = new model("user",userModel);
