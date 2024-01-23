@@ -1,7 +1,8 @@
 const express = require("express");
 const { loginValidation, verifyValidation, emailValidation, resetPasswordValidation } = require("../utils/validation");
-const { userLogin, userVerify, resendOTP, forgotPassword, resetPassword } = require("../controllers/authControllers");
+const { userLogin, userVerify, resendOTP, forgotPassword, resetPassword, logoutUser } = require("../controllers/authControllers");
 const { errorHandler } = require("../middlewares/errorMiddleware");
+const Auth = require("../middlewares/authentication");
 
 const route = express.Router();
 
@@ -19,5 +20,8 @@ route.post('/forgot-password', emailValidation, errorHandler, forgotPassword)
 
 // reset password api
 route.post('/reset-password',resetPasswordValidation ,errorHandler ,resetPassword)
+
+//logout api
+route.post('/logout',Auth,logoutUser)
 
 module.exports = route;
