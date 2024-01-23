@@ -5,7 +5,7 @@ const userModel = require("../models/userModel");
 exports.userValidation = [
     check("fullName", "FullName is a required field.").notEmpty(),
     check("email", "Email must be a valid email.").isEmail().custom(async (email, { req }) => {
-        const data = await userModel.findOne({ email: { $regex: new RegExp('^' + req.body.email, 'i') } })
+        const data = await userModel.findOne({ email: req.body.email})
 
         if (email && data) {
             throw new Error("Email address already exists.")
@@ -25,6 +25,24 @@ exports.userValidation = [
             throw new Error('Password and Confirm password does not match.');
         }
     })
+    // check('role_id', "Role id is Required.").isMongoId(),
+]
+
+//  user update
+exports.userUpdateValidation = [
+    check("fullName", "FullName is a required field.").notEmpty(),
+    check("email", "Email must be a valid email.").isEmail().custom(async (email, { req }) => {
+        const data = await userModel.findOne({ email: req.body.email})
+        if (email && data && data._id != req.params.id) {
+            throw new Error("Email address already exists.")
+        }
+    }),
+    check("mobileNumber", "Mobile number must be at least 10 character.").isLength({ min: 10, max: 10 }),
+    check("address", "Address is a required field.").notEmpty(),
+    check("state", "State is a required field.").notEmpty(),
+    check("city", "City is a required field.").notEmpty(),
+    check("pinCode", "Pincode is a required field.").notEmpty(),
+    check("gender", "Gender is a required field.").notEmpty()
     // check('role_id', "Role id is Required.").isMongoId(),
 ]
 
