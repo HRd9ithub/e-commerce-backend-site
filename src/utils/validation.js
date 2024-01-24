@@ -43,7 +43,6 @@ exports.userUpdateValidation = [
     check("city", "City is a required field.").notEmpty(),
     check("pinCode", "Pincode is a required field.").notEmpty(),
     check("gender", "Gender is a required field.").notEmpty()
-    // check('role_id', "Role id is Required.").isMongoId(),
 ]
 
 // status validation
@@ -130,3 +129,15 @@ exports.subCategoryValidation = [
     check("name","Name is a required field.").notEmpty(),
     check("categoryId","CategoryId is a required field.").isMongoId()
 ]
+
+// ------------------------------- product Api
+
+exports.productValidation = [
+    check("name", "Name is a required field.").notEmpty(),
+    check("price", "Price is a required field.").notEmpty(),
+    check("description", "Description is a required field.").notEmpty(),
+    check("stock", "Stock is a required field.").notEmpty(),
+    check("categoryId", "Category is a required field.").isMongoId(),
+    check('isActive', "Invalid isActive.Please enter the isActive value for true or false.").isIn(["true", "false"]),
+]
+

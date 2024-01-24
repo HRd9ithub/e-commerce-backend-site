@@ -9,6 +9,16 @@ const storage = multer.diskStorage({
     }
   })
   
-  const upload = multer({ storage: storage })
+  const upload = multer({ 
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+      var ext = path.extname(file.originalname)
+      if (ext.toLowerCase() === '.png' || ext.toLowerCase() === '.jpg' || ext.toLowerCase() === '.svg' || ext.toLowerCase() === '.jpeg' ) {
+          cb(null, true);
+      } else {
+          return cb(new Error('The image type is not allowed. Allowed types: SVG, jpeg, jpg, png'))
+      }
+    }
+   })
 
   module.exports = upload;
