@@ -1,9 +1,20 @@
+const { default: mongoose } = require("mongoose");
 const subCategoryModel = require("../models/subCategoryModel");
 
 
 // create 
 const createSubCategory = async(req,res) => {
     try {
+        const record = await subCategoryModel.find({categoryId: new mongoose.Types.ObjectId(req.body.categoryId)})
+
+        if(record){
+           const filterData = record.find((val) => {
+                return val.name.toLowerCase() === req.body.name
+            })
+            if(filterData){
+                return res.status(400).json({message: "Sub-category already exists.", success: false});
+            }
+        }
         await subCategoryModel.create(req.body);
 
         return res.status(201).json({message: "Data added successfully.", success: true});
@@ -16,6 +27,17 @@ const createSubCategory = async(req,res) => {
 const updateSubCategory = async(req,res) => {
     try {
         const { id } = req.params;
+        const record = await subCategoryModel.find({categoryId: new mongoose.Types.ObjectId(req.body.categoryId),_id: {$ne: id}})
+        console.log(record)
+
+        if(record){
+           const filterData = record.find((val) => {
+                return val.name.toLowerCase() === req.body.name
+            })
+            if(filterData){
+                return res.status(400).json({message: "Sub-category already exists.", success: false});
+            }
+        }
 
         const subcategoryData = await subCategoryModel.findByIdAndUpdate({_id: id},{$set: req.body })
 
@@ -33,7 +55,27 @@ const updateSubCategory = async(req,res) => {
 // get 
 const getSubCategories = async(req,res) => {
     try {
-        const subCategoriesData = await subCategoryModel.find({deleteAt: {$exists : false}});
+        const subCategoriesData = await subCategoryModel.aggregate([
+            {
+                $match: {
+                    deleteAt: {$exists : false}
+                }
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "category",
+                }
+            },
+            {
+                $unwind: {
+                    path: "$category",
+                    preserveNullAndEmptyArrays: false
+                }
+            }
+        ])
 
         return res.status(200).json({message: "Data fetch successfully.", success: true, data: subCategoriesData || []});
 

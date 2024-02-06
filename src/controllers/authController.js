@@ -7,8 +7,9 @@ const bcrypt = require("bcrypt");
 // login function
 const userLogin = async (req, res) => {
     try {
+        req.body.isAdmin = req.route.path === "/admin/login" ? true : false;
         // email check exist or not
-        const userData = await userModel.findOne({ email: req.body.email, status: "Active", deleteAt: {$exists: false} });
+        const userData = await userModel.findOne({ email: req.body.email, status: "Active", isAdmin: req.body.isAdmin, deleteAt: {$exists: false} });
 
         if (!userData) {
             return res.status(404).json({ message: "Invalid email or password.", success: false })
@@ -30,7 +31,7 @@ const userLogin = async (req, res) => {
 
         const response = await userModel.findByIdAndUpdate({ _id: userData._id }, { otp, expireIn: new Date().getTime() + 5 * 60000, $unset: { token: 1 } }, { new: true })
 
-        return res.status(200).json({ success: true, message: "OTP sent successfully.", data: response.email })
+        return res.status(200).json({ success: true, message: "OTP sent successfully.", email: response.email })
 
     } catch (error) {
         return res.status(500).json({ message: error.message || 'Internal server Error', success: false })
@@ -48,17 +49,17 @@ const userVerify = async (req, res) => {
             const diff = data.expireIn - currTime
 
             if (diff < 0) {
-                return res.status(400).json({ message: "OTP has expired.", success: false })
+                return res.status(400).json({ errors: ["OTP has expired."], success: false })
             }
 
             // generate token
             const token = await data.generateToken();
 
             const response = await userModel.findByIdAndUpdate({ _id: data._id }, { $unset: { otp: 1, expireIn: 1 }, $set: { token } }, { new: true })
-            return res.status(200).json({ success: true, message: "Logged in successfully.", token: token, id: response._id })
+            return res.status(200).json({ success: true, message: "Logged in successfully.", token: token, id: response._id})
         } else {
             // not match send message
-            return res.status(400).json({ message: "OTP is invalid.", success: false })
+            return res.status(400).json({ errors: ["OTP is invalid."], success: false })
         }
     } catch (error) {
         res.status(500).json({ message: error.message || 'Internal server Error', success: false })
@@ -124,17 +125,17 @@ const resetPassword = async (req, res) => {
     try {
         const TokenArray = req.headers['authorization'];
 
-        if (!TokenArray) return res.status(400).json({ success: false, message: "Token is a required field." })
+        if (!TokenArray) return res.status(400).json({ success: false, errors: "Token is a required field." })
         const token = TokenArray.split(" ")[1];
     
-        if (!token) return res.status(400).json({ success: false, message: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent." })
+        if (!token) return res.status(400).json({ success: false, errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent." })
 
         const data = await userModel.findOne({
             email: req.body.email,
             forgotToken: token,
         },{forgotToken : 1, forgotTokenExpireIn : 1});
 
-        if (!data) return res.status(400).json({ message: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
+        if (!data) return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
         
         const currTime = new Date().getTime()
         
@@ -146,7 +147,7 @@ const resetPassword = async (req, res) => {
             const response = await userModel.findByIdAndUpdate({ _id: data._id }, { $set : {password: passwordHash},$unset : {forgotToken : 1, forgotTokenExpireIn : 1} }, { new: true })
             return res.status(200).json({ success: true, message: "Password reset successfully." })
         } else {
-           return res.status(400).json({ message: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
+           return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
         } 
     } catch (error) {
         return res.status(500).json({ message: error.message || 'Internal server Error', success: false })
