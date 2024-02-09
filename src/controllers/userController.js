@@ -37,12 +37,13 @@ const singleUserGet = async (req, res) => {
 // all get user
 const getUsers = async (req, res) => {
     try {
-        const userData = await userModel.find({deleteAt : {$exists : false}},{
+        const userData = await userModel.find({deleteAt : {$exists : false},isAdmin: false},{
             password : 0,
             otp: 0,
             expireIn: 0,
             forgotToken: 0,
             forgotTokenExpireIn: 0,
+            isAdmin: 0,
             token: 0
         })
 
