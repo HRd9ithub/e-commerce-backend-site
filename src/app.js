@@ -9,7 +9,7 @@ const productRoute = require("./routes/productRoute");
 const app = express();
 
 app.use(cors({
-    "origin": process.env.RESET_PASSWORD_URL,
+    "origin": "*",
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "preflightContinue": false,
     "optionsSuccessStatus": 204

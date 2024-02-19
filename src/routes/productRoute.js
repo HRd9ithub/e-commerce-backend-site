@@ -9,9 +9,9 @@ const route = express.Router();
 
 
 // create api route
-route.post("/", Auth, upload.fields([
-    { name: 'image' }
-]), productValidation, errorHandler, createProduct);
+// route.post("/", Auth, upload.fields([
+//     { name: 'image' }
+// ]), productValidation, errorHandler, createProduct);
 
 // get api route
 route.get("/", Auth, getProducts);
@@ -19,10 +19,10 @@ route.get("/", Auth, getProducts);
 // get single api route
 route.get("/:id", Auth, singleGetroduct);
 
-// update api route
-route.put("/:id", Auth, upload.fields([
-    { name: 'image' }
-]), productValidation, errorHandler, updateProduct);
+// // update api route
+// route.put("/:id", Auth, upload.fields([
+//     { name: 'image' }
+// ]), productValidation, errorHandler, updateProduct);
 
 // delete api route
 route.delete("/:id", Auth, deleteProduct);

@@ -39,10 +39,6 @@ const userModel = new Schema({
     pinCode: {
         type: String,
     },
-    gender: {
-        type: String,
-        enum: ['Male', 'Female']
-    },
     status: {
         type: String,
         enum: ['Active', 'Inactive'],

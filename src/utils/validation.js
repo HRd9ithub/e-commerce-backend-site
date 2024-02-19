@@ -42,7 +42,6 @@ exports.userUpdateValidation = [
     check("state", "State is a required field.").notEmpty(),
     check("city", "City is a required field.").notEmpty(),
     check("pinCode", "Pincode is a required field.").notEmpty(),
-    check("gender", "Gender is a required field.").notEmpty()
 ]
 
 // status validation
