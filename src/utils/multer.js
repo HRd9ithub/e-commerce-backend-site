@@ -19,6 +19,9 @@ const storage = multer.diskStorage({
           return cb(new Error('The image type is not allowed. Allowed types: SVG, jpeg, jpg, png'))
       }
     }
-   })
+  });
 
-  module.exports = upload;
+  module.exports = {
+    upload: upload.single('profileImage')
+  }
+

@@ -8,6 +8,7 @@ const route = express.Router();
 
 // login route
 route.post("/login", loginValidation, errorHandler, userLogin);
+route.post("/admin/login", loginValidation, errorHandler, userLogin);
 
 // verify route
 route.patch("/otp", verifyValidation, errorHandler, userVerify);
