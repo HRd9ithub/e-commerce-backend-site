@@ -22,6 +22,7 @@ const storage = multer.diskStorage({
   });
 
   module.exports = {
-    upload: upload.single('profileImage')
+    upload: upload.single('profileImage'),
+    productImageUpload:  upload.fields([{ name: 'image' }])
   }
 

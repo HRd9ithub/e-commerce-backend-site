@@ -28,7 +28,6 @@ const updateSubCategory = async(req,res) => {
     try {
         const { id } = req.params;
         const record = await subCategoryModel.find({categoryId: new mongoose.Types.ObjectId(req.body.categoryId),_id: {$ne: id}})
-        console.log(record)
 
         if(record){
            const filterData = record.find((val) => {
