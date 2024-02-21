@@ -134,9 +134,9 @@ exports.subCategoryValidation = [
 exports.productValidation = [
     check("name", "Name is a required field.").notEmpty(),
     check("price", "Price is a required field.").notEmpty(),
-    check("description", "Description is a required field.").notEmpty(),
     check("stock", "Stock is a required field.").notEmpty(),
+    check("description", "Description is a required field.").notEmpty(),
     check("categoryId", "Category is a required field.").isMongoId(),
-    check('isActive', "Invalid isActive.Please enter the isActive value for true or false.").isIn(["true", "false"]),
+    check('status', "Invalid status.Please enter the status value for Active or Inactive.").isIn(["Active", "Inactive"]),
 ]
 

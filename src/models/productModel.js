@@ -3,18 +3,18 @@ const { Schema, model } = require("mongoose");
 const productModel = new Schema({
     name: {
         type: String,
-        require: true
+        required: true
     },
     price: {
         type: Number,
-        require: true
+        required: true
     },
-    discountPrice: {
+    salePrice: {
         type: Number,
     },
     description: {
         type: String,
-        require: true
+        required: true
     },
     categoryId: {
         type: Schema.ObjectId,
@@ -22,12 +22,16 @@ const productModel = new Schema({
         ref: "categoryModel"
     },
     subCategoryId: {
-        type: Schema.ObjectId,
+        type: [Schema.ObjectId],
         ref: "subCategoryModel"
     },
     stock: {
         type: Number,
-        require: true
+        required: true
+    },
+    thumbnail :{
+        type: String,
+        required: true
     },
     images: {
         type: [String], // Assuming the images are stored as strings (file paths or URLs)
@@ -38,15 +42,14 @@ const productModel = new Schema({
             message: 'A minimum of 1 and a maximum of 5 images are required.'
         }
     },
-    colors: {
-        type: [String],
-        default: ["#000000"]
-    },
     sizes: {
         type: [String]
     },
-    isActive: {
-        type: Boolean,
+    colors: {
+        type: [String]
+    },
+    status: {
+        type: String,
         require: true
     },
     deleteAt: {

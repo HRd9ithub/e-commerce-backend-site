@@ -10,14 +10,15 @@ const createProduct = async (req, res) => {
             req.files?.image.forEach((val) => {
                 images.push(`Images/${val.filename}`)
             });
-            req.body.images = images
+            req.body.thumbnail = images[0];
+            req.body.images = images;
         }
 
         const productData = new productModel(req.body);
 
         await productData.save();
 
-        return res.status(201).json({ message: "Data added successfully.", success: true, data: productData });
+        return res.status(201).json({ message: "Data added successfully.", success: true });
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message?.replace("product validation failed: images: ", "") || "Interner server error." });
@@ -47,22 +48,7 @@ const getProducts = async (req, res) => {
                     path: "$category",
                     preserveNullAndEmptyArrays: true
                 }
-            },
-            {
-                $lookup:
-                {
-                    from: "subcategories",
-                    localField: "subCategoryId",
-                    foreignField: "_id",
-                    as: "subCategory"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$subCategory",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
+            }
         ])
         return res.status(200).json({ message: "Data fetch successfully.", success: true, products });
 
@@ -104,13 +90,7 @@ const singleGetroduct = async (req, res) => {
                     foreignField: "_id",
                     as: "subCategory"
                 }
-            },
-            {
-                $unwind: {
-                    path: "$subCategory",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
+            }
         ])
         return res.status(200).json({ message: "Data fetch successfully.", success: true, product: product.length === 0 ? {} : product[0] });
 
@@ -124,20 +104,41 @@ const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
         let images = [];
-        images.push(req.body.images);
+        if (req.body.image) {
+            if (typeof req.body.image === "object") {
+                images.push(...req.body.image);
+            } else {
+                images.push(req.body.image);
+            }
+        }
         // image add
         if (req.files?.image) {
             req.files?.image.forEach((val) => {
                 images.push(`Images/${val.filename}`)
             });
-            req.body.images = images
         }
+        req.body.images = images;
+        req.body.thumbnail = images[0];
 
-        const product = await productModel.findByIdAndUpdate({ _id: id }, { $set: req.body })
+        const product = await productModel.findByIdAndUpdate({ _id: id }, {
+            $set: {
+                name: req.body.name,
+                price: req.body.price,
+                salePrice: req.body.salePrice,
+                description: req.body.description,
+                categoryId: req.body.categoryId,
+                stock: req.body.stock,
+                thumbnail: req.body.thumbnail,
+                images: req.body.images,
+                colors: req.body.colors,
+                status: req.body.status,
+                subCategoryId: req.body.subCategoryId ? req.body.subCategoryId : [],
+                sizes: req.body.sizes ? req.body.sizes : [],
+            }});
 
-        if(product){
+        if (product) {
             return res.status(200).json({ message: "Data updated successfully.", success: true });
-        }else{
+        } else {
             return res.status(404).json({ message: "Record not found.", success: false });
         }
     } catch (error) {
@@ -146,15 +147,15 @@ const updateProduct = async (req, res) => {
 }
 
 // delete function
-const deleteProduct = async(req, res) => {
+const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const product = await productModel.findByIdAndUpdate({ _id: id }, { $set: {deleteAt: new Date()} });
+        const product = await productModel.findByIdAndUpdate({ _id: id }, { $set: { deleteAt: new Date() } });
 
-        if(product){
+        if (product) {
             return res.status(200).json({ message: "Data deleted successfully.", success: true });
-        }else{
+        } else {
             return res.status(404).json({ message: "Record not found.", success: false });
         }
 
