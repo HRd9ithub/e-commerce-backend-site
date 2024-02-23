@@ -3,7 +3,7 @@ const Auth = require("../middlewares/authentication");
 const { productValidation } = require("../utils/validation");
 const { productImageUpload } = require("../utils/multer");
 const { errorHandler } = require("../middlewares/errorMiddleware");
-const { createProduct, getProducts, singleGetroduct, updateProduct, deleteProduct } = require("../controllers/productController");
+const { createProduct, getProducts, singleGetroduct, updateProduct, deleteProduct, getProductsLists } = require("../controllers/productController");
 
 const route = express.Router();
 
@@ -13,6 +13,9 @@ route.post("/", Auth, productImageUpload , productValidation, errorHandler, crea
 
 // get api route
 route.get("/", Auth, getProducts);
+
+// get api route
+route.get("/list", getProductsLists);
 
 // get single api route
 route.get("/:id", Auth, singleGetroduct);

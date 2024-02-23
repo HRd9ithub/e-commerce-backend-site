@@ -134,7 +134,8 @@ const updateProduct = async (req, res) => {
                 status: req.body.status,
                 subCategoryId: req.body.subCategoryId ? req.body.subCategoryId : [],
                 sizes: req.body.sizes ? req.body.sizes : [],
-            }});
+            }
+        });
 
         if (product) {
             return res.status(200).json({ message: "Data updated successfully.", success: true });
@@ -164,10 +165,97 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+// ------------------ client side funcation ------------------------
+// get function
+const getProductsLists = async (req, res) => {
+    try {
+        const featuredProducts = await productModel.aggregate([
+            {
+                $match: {
+                    deleteAt: { $exists: false },
+                    status: { $eq: "Active" }
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            },
+            {
+                $group: {
+                    _id: '$subCategoryId',
+                    products: { $first: '$$ROOT' },
+                }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $project:{
+                    _id: 0
+                }
+            }
+        ])
+        const newProducts = await productModel.aggregate([
+            {
+                $match: {
+                    deleteAt: { $exists: false },
+                    status: { $eq: "Active" }
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            },
+            {
+                $limit: 10
+            }
+        ])
+        const products = await productModel.aggregate([
+            {
+                $match: {
+                    deleteAt: { $exists: false },
+                    status: { $eq: "Active" }
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "categories",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$category",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "subcategories",
+                    localField: "subCategoryId",
+                    foreignField: "_id",
+                    as: "subCategory"
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        ])
+        return res.status(200).json({ message: "Data fetch successfully.", success: true, newProducts, featuredProducts, products });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message || "Interner server error." });
+    }
+}
+
+
 module.exports = {
     createProduct,
     getProducts,
     singleGetroduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getProductsLists
 }
