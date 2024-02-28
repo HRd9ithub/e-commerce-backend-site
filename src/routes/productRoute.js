@@ -3,7 +3,7 @@ const Auth = require("../middlewares/authentication");
 const { productValidation } = require("../utils/validation");
 const { productImageUpload } = require("../utils/multer");
 const { errorHandler } = require("../middlewares/errorMiddleware");
-const { createProduct, getProducts, singleGetroduct, updateProduct, deleteProduct, getProductsLists } = require("../controllers/productController");
+const { createProduct, getProducts, singleGetroduct, updateProduct, deleteProduct, getProductsLists, getFilterValues } = require("../controllers/productController");
 
 const route = express.Router();
 
@@ -17,8 +17,11 @@ route.get("/", Auth, getProducts);
 // get api route
 route.get("/list", getProductsLists);
 
+// get filter value
+route.get("/filter", getFilterValues);
+
 // get single api route
-route.get("/:id", Auth, singleGetroduct);
+route.get("/:id", singleGetroduct);
 
 // update api route
 route.put("/:id", Auth,productImageUpload, productValidation, errorHandler, updateProduct);

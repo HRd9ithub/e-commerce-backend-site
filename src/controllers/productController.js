@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const productModel = require("../models/productModel");
+const categoryModel = require("../models/categoryModel");
 
 // create function
 const createProduct = async (req, res) => {
@@ -13,7 +14,7 @@ const createProduct = async (req, res) => {
             req.body.thumbnail = images[0];
             req.body.images = images;
         }
-
+        req.body.subCategoryId = req.body.subCategoryId ? req.body.subCategoryId : []
         const productData = new productModel(req.body);
 
         await productData.save();
@@ -177,7 +178,7 @@ const getProductsLists = async (req, res) => {
                 }
             },
             {
-                $sort: { createdAt: -1 }
+                $sort: { _id: -1 }
             },
             {
                 $group: {
@@ -189,8 +190,13 @@ const getProductsLists = async (req, res) => {
                 $limit: 10
             },
             {
-                $project:{
-                    _id: 0
+                $project: {
+                    _id: "$products._id",
+                    name: "$products.name",
+                    price: "$products.price",
+                    salePrice: "$products.salePrice",
+                    thumbnail: "$products.thumbnail",
+                    createdAt: "$products.createdAt"
                 }
             }
         ])
@@ -206,6 +212,16 @@ const getProductsLists = async (req, res) => {
             },
             {
                 $limit: 10
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    price: 1,
+                    salePrice: 1,
+                    thumbnail: 1,
+                    createdAt: 1
+                }
             }
         ])
         const products = await productModel.aggregate([
@@ -250,6 +266,56 @@ const getProductsLists = async (req, res) => {
     }
 }
 
+// getFilterValues
+const getFilterValues = async (req, res) => {
+    try {
+        const filterValue = await productModel.aggregate([
+            {
+                $unwind: "$colors"
+            },
+            {
+                $unwind: "$sizes"
+            },
+            {
+                $group: {
+                    _id: null,
+                    maxPrice: { $max: "$price" },
+                    uniqueColors: { $addToSet: "$colors" },
+                    uniqueSizes: { $addToSet: "$sizes" }
+                }
+            }
+        ]);
+
+        const categoryData = await categoryModel.aggregate([
+            {
+                $match: {
+                    deleteAt: { $exists: false }
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "subcategories",
+                    localField: "_id",
+                    foreignField: "categoryId",
+                    pipeline: [
+                        {
+                            $match: {
+                                "deleteAt": { $exists: false },
+                            }
+                        }
+                    ],
+                    as: "subCategory"
+                }
+            }
+        ])
+
+        return res.status(200).json({ message: "Filter fetch successfully.", success: true, filterValue: filterValue.length !== 0 ? filterValue[0] : {}, categoryData });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message || "Interner server error." });
+    }
+}
 
 module.exports = {
     createProduct,
@@ -257,5 +323,6 @@ module.exports = {
     singleGetroduct,
     updateProduct,
     deleteProduct,
-    getProductsLists
+    getProductsLists,
+    getFilterValues
 }
