@@ -1,12 +1,13 @@
 const { check } = require("express-validator");
 const userModel = require("../models/userModel");
 const categoryModel = require("../models/categoryModel");
+const couponModel = require("../models/couponModel");
 
 //  users
 exports.userValidation = [
     check("fullName", "FullName is a required field.").notEmpty(),
     check("email", "Email must be a valid email.").isEmail().custom(async (email, { req }) => {
-        const data = await userModel.findOne({ email: req.body.email})
+        const data = await userModel.findOne({ email: req.body.email })
 
         if (email && data) {
             throw new Error("Email address already exists.")
@@ -32,7 +33,7 @@ exports.userValidation = [
 exports.userUpdateValidation = [
     check("fullName", "FullName is a required field.").notEmpty(),
     check("email", "Email must be a valid email.").isEmail().custom(async (email, { req }) => {
-        const data = await userModel.findOne({ email: req.body.email})
+        const data = await userModel.findOne({ email: req.body.email })
         if (email && data && data._id != req.params.id) {
             throw new Error("Email address already exists.")
         }
@@ -55,17 +56,17 @@ exports.statusValidation = [
 
 // authtication
 exports.loginValidation = [
-    check("email","Email is a required field.").isEmail(),
-    check("password","Password is a required field.").notEmpty()
+    check("email", "Email is a required field.").isEmail(),
+    check("password", "Password is a required field.").notEmpty()
 ]
 // verfiy
 exports.verifyValidation = [
-    check("email","Email is a required field.").isEmail(),
-    check("otp","OTP is a required field.").notEmpty()
+    check("email", "Email is a required field.").isEmail(),
+    check("otp", "OTP is a required field.").notEmpty()
 ]
 // verfiy
 exports.emailValidation = [
-    check("email","Email is a required field.").isEmail(),
+    check("email", "Email is a required field.").isEmail(),
 ]
 
 // reset password validation
@@ -115,9 +116,9 @@ exports.passwordValidation = [
 // ------------------------------- category api 
 
 exports.categoryValidation = [
-    check("name","Name is a required field.").notEmpty().custom(async (name, { req }) => {
-        const data = await categoryModel.findOne({ name: { $regex: new RegExp(name, 'i') }})
-        
+    check("name", "Name is a required field.").trim().notEmpty().custom(async (name, { req }) => {
+        const data = await categoryModel.findOne({ name: { $regex: new RegExp(name, 'i') } })
+
         if (name && data && data._id !== req.params.id) {
             throw new Error("Category already exists.")
         }
@@ -125,18 +126,36 @@ exports.categoryValidation = [
 ]
 // ------------------------------- sub category api 
 exports.subCategoryValidation = [
-    check("name","Name is a required field.").notEmpty(),
-    check("categoryId","CategoryId is a required field.").isMongoId()
+    check("name", "Name is a required field.").trim().notEmpty(),
+    check("categoryId", "CategoryId is a required field.").isMongoId()
 ]
 
 // ------------------------------- product Api
 
 exports.productValidation = [
-    check("name", "Name is a required field.").notEmpty(),
-    check("price", "Price is a required field.").notEmpty(),
-    check("stock", "Stock is a required field.").notEmpty(),
-    check("description", "Description is a required field.").notEmpty(),
+    check("name", "Name is a required field.").trim().notEmpty(),
+    check("price", "Price is a required field.").trim().notEmpty(),
+    check("stock", "Stock is a required field.").trim().notEmpty(),
+    check("description", "Description is a required field.").trim().notEmpty(),
     check("categoryId", "Category is a required field.").isMongoId(),
     check('status', "Invalid status.Please enter the status value for Active or Inactive.").isIn(["Active", "Inactive"]),
 ]
 
+// --------------------------------  coupon code validation
+
+exports.couponCodeValidation = [
+    check("code", "Code is a required field.").trim().notEmpty().custom(async (code, { req }) => {
+        const isexists = await couponModel.findOne({ code, _id: { $ne: req.params.id } });
+        if (code && isexists) {
+            throw new Error("Code already exists.");
+        }
+    }),
+    check("percentage", "Percentage  is a required field.").trim().notEmpty(),
+    check("activation_date", "Activation date is a required field.").isDate(),
+    check("expired_date", "Expired date is a required field.").isDate().custom(async (date, { req }) => {
+        console.log(date < req.body.activation_date);
+        if (date && date < req.body.activation_date) {
+            throw new Error("Expired date is invalid.")
+        }
+    })
+]

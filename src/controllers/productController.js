@@ -269,22 +269,33 @@ const getProductsLists = async (req, res) => {
 // getFilterValues
 const getFilterValues = async (req, res) => {
     try {
-        const filterValue = await productModel.aggregate([
-            {
-                $unwind: "$colors"
-            },
-            {
-                $unwind: "$sizes"
-            },
-            {
-                $group: {
-                    _id: null,
-                    maxPrice: { $max: "$price" },
-                    uniqueColors: { $addToSet: "$colors" },
-                    uniqueSizes: { $addToSet: "$sizes" }
-                }
-            }
-        ]);
+        const maxPrice = await productModel.findOne({deleteAt: { $exists: false }},{price: 1}).sort({price: -1});
+        const uniqueColors = await productModel.distinct("colors");
+        const uniqueSizes = await productModel.distinct("sizes");
+
+        const filterValue = {
+            maxPrice: maxPrice.price || 0,
+            uniqueColors,
+            uniqueSizes
+        }
+
+
+        // const filterValue = await productModel.aggregate([
+        //     {
+        //         $unwind: "$colors"
+        //     },
+        //     {
+        //         $unwind: "$sizes"
+        //     },
+        //     {
+        //         $group: {
+        //             _id: null,
+        //             maxPrice: { $max: "$price" },
+        //             uniqueColors: { $addToSet: "$colors" },
+        //             uniqueSizes: { $addToSet: "$sizes" }
+        //         }
+        //     }
+        // ]);
 
         const categoryData = await categoryModel.aggregate([
             {
@@ -310,7 +321,7 @@ const getFilterValues = async (req, res) => {
             }
         ])
 
-        return res.status(200).json({ message: "Filter fetch successfully.", success: true, filterValue: filterValue.length !== 0 ? filterValue[0] : {}, categoryData });
+        return res.status(200).json({ message: "Filter fetch successfully.", success: true, filterValue, categoryData });
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message || "Interner server error." });
