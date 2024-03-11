@@ -102,7 +102,7 @@ const forgotPassword = async (req, res) => {
 
             const mailsubject = 'Reset Password';
             // mail content
-            const url = `${process.env.RESET_PASSWORD_URL}/reset-password?email=${req.body.email}&token=${token}`
+            const url = `${userData.isAdmin ? process.env.RESET_PASSWORD_ADMIN_URL: process.env.RESET_PASSWORD_CLIENT_URL}/reset-password?email=${req.body.email}&token=${token}`
 
             // mail send function
             const result = await forgotEmail(req.body.email, mailsubject, url);
