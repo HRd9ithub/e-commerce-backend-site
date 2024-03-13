@@ -9,15 +9,21 @@ const userModel = new Schema({
     },
     email: {
         type: String,
-        require: true
     },
     password: {
-        type: String,
-        require: true
+        type: String
+    },
+    googleId: {
+        type: String
+    },
+    facebookId: {
+        type: String
+    },
+    githubId: {
+        type: String
     },
     mobileNumber: {
-        type: Number,
-        require: true
+        type: Number
     },
     profileImage: {
         type: String,

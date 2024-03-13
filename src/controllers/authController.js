@@ -9,7 +9,7 @@ const userLogin = async (req, res) => {
     try {
         req.body.isAdmin = req.route.path === "/admin/login" ? true : false;
         // email check exist or not
-        const userData = await userModel.findOne({ email: req.body.email, status: "Active", isAdmin: req.body.isAdmin, deleteAt: {$exists: false} });
+        const userData = await userModel.findOne({ email: req.body.email, status: "Active", isAdmin: req.body.isAdmin, deleteAt: { $exists: false } });
 
         if (!userData) {
             return res.status(404).json({ message: "Invalid email or password.", success: false })
@@ -56,7 +56,7 @@ const userVerify = async (req, res) => {
             const token = await data.generateToken();
 
             const response = await userModel.findByIdAndUpdate({ _id: data._id }, { $unset: { otp: 1, expireIn: 1 }, $set: { token } }, { new: true })
-            return res.status(200).json({ success: true, message: "Logged in successfully.", token: token, id: response._id})
+            return res.status(200).json({ success: true, message: "Logged in successfully.", token: token, id: response._id })
         } else {
             // not match send message
             return res.status(400).json({ errors: ["OTP is invalid."], success: false })
@@ -70,7 +70,7 @@ const userVerify = async (req, res) => {
 const resendOTP = async (req, res) => {
     try {
         // get data for email
-        const data = await userModel.findOne({ email: req.body.email, deleteAt: {$exists: false} });
+        const data = await userModel.findOne({ email: req.body.email, deleteAt: { $exists: false } });
 
         if (!data) {
             return res.status(404).json({ message: "Account not found with the provided email.", success: false });
@@ -94,7 +94,7 @@ const resendOTP = async (req, res) => {
 const forgotPassword = async (req, res) => {
     try {
         // email check exist or not
-        const userData = await userModel.findOne({ email: req.body.email, deleteAt: {$exists: false} })
+        const userData = await userModel.findOne({ email: req.body.email,githubId: {$exists: false}, googleId: { $exists: false }, facebookId: { $exists: false }, deleteAt: { $exists: false } })
 
         if (userData) {
             // generate token
@@ -102,12 +102,12 @@ const forgotPassword = async (req, res) => {
 
             const mailsubject = 'Reset Password';
             // mail content
-            const url = `${userData.isAdmin ? process.env.RESET_PASSWORD_ADMIN_URL: process.env.RESET_PASSWORD_CLIENT_URL}/reset-password?email=${req.body.email}&token=${token}`
+            const url = `${userData.isAdmin ? process.env.RESET_PASSWORD_ADMIN_URL : process.env.RESET_PASSWORD_CLIENT_URL}/reset-password?email=${req.body.email}&token=${token}`
 
             // mail send function
             const result = await forgotEmail(req.body.email, mailsubject, url);
 
-            const response = await userModel.findByIdAndUpdate({ _id: userData._id }, {$set: { forgotToken :token, forgotTokenExpireIn : new Date().getTime() + 30 * 60000 } }, { new: true })
+            const response = await userModel.findByIdAndUpdate({ _id: userData._id }, { $set: { forgotToken: token, forgotTokenExpireIn: new Date().getTime() + 30 * 60000 } }, { new: true })
 
             return res.status(200).json({ success: true, message: "A password reset link has been emailed to you." })
         } else {
@@ -127,28 +127,28 @@ const resetPassword = async (req, res) => {
 
         if (!TokenArray) return res.status(400).json({ success: false, errors: "Token is a required field." })
         const token = TokenArray.split(" ")[1];
-    
+
         if (!token) return res.status(400).json({ success: false, errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent." })
 
         const data = await userModel.findOne({
             email: req.body.email,
             forgotToken: token,
-        },{forgotToken : 1, forgotTokenExpireIn : 1});
+        }, { forgotToken: 1, forgotTokenExpireIn: 1 });
 
-        if (!data) return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
-        
+        if (!data) return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.", success: false })
+
         const currTime = new Date().getTime()
-        
+
         const diff = data.forgotTokenExpireIn - currTime
-        
+
         if (diff > 0) {
             // password convert hash
             const passwordHash = await bcrypt.hash(req.body.password, 10)
-            const response = await userModel.findByIdAndUpdate({ _id: data._id }, { $set : {password: passwordHash},$unset : {forgotToken : 1, forgotTokenExpireIn : 1} }, { new: true })
+            const response = await userModel.findByIdAndUpdate({ _id: data._id }, { $set: { password: passwordHash }, $unset: { forgotToken: 1, forgotTokenExpireIn: 1 } }, { new: true })
             return res.status(200).json({ success: true, message: "Password reset successfully." })
         } else {
-           return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.",  success: false })
-        } 
+            return res.status(400).json({ errors: "The reset password link has expired. To reset your password, return to the login page and select 'Forgot Password' to have a new email sent.", success: false })
+        }
     } catch (error) {
         return res.status(500).json({ message: error.message || 'Internal server Error', success: false })
     }
@@ -157,11 +157,11 @@ const resetPassword = async (req, res) => {
 // logout function
 const logoutUser = async (req, res) => {
     try {
-         const { _id } = req.user;
+        const { _id } = req.user;
 
-         const userData = await userModel.findByIdAndUpdate({_id},{$unset : {token : 1}});
+        const userData = await userModel.findByIdAndUpdate({ _id }, { $unset: { token: 1 } });
 
-         return res.status(200).json({message: "Logout successfully.",success: true})
+        return res.status(200).json({ message: "Logout successfully.", success: true })
     } catch (error) {
         return res.status(500).json({ message: error.message || 'Internal server Error', success: false })
     }

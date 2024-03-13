@@ -153,7 +153,6 @@ exports.couponCodeValidation = [
     check("percentage", "Percentage  is a required field.").trim().notEmpty(),
     check("activation_date", "Activation date is a required field.").isDate(),
     check("expired_date", "Expired date is a required field.").isDate().custom(async (date, { req }) => {
-        console.log(date < req.body.activation_date);
         if (date && date < req.body.activation_date) {
             throw new Error("Expired date is invalid.")
         }
