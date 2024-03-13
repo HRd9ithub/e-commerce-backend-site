@@ -65,8 +65,6 @@ const paymentInitgation = async (req, res) => {
                 cancel_url: `${YOUR_DOMAIN}/checkout`,
             });
         }
-        console.log('session :>> ', session);
-
         const orderData = new orderModel({
             shipping: {
                 fullName,
@@ -158,7 +156,6 @@ const getSingleOrderList = async (req, res) => {
 // download file
 const downloadReceipt = async (req, res) => {
     try {
-        console.log('__dirname :>> ', __dirname);
         const filepath = path.resolve(__dirname, "../../templates/views/orderReceipt.ejs");
         const file = fs.readFileSync(filepath).toString();
         // const orderData = await orderModel.findById({_id: req.params.id});

@@ -115,10 +115,14 @@ const changePassword = async (req, res) => {
     try {
         const userData = await userModel.findOne({ _id: req.user._id }).select("-token")
 
-        // password compare
-        const isMatch = await bcrypt.compare(req.body.currentPassword, userData.password);
+        if (userData.password) {
+            // password compare
+            const isMatch = await bcrypt.compare(req.body.currentPassword, userData.password);
 
-        if (!isMatch) {
+            if (!isMatch) {
+                return res.status(400).json({ error: ["Incorrect current password."], success: false })
+            }
+        }else{
             return res.status(400).json({ error: ["Incorrect current password."], success: false })
         }
 
